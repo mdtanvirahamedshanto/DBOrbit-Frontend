@@ -8,7 +8,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "panel-surface text-card-foreground shadow-panel",
+        "panel-surface panel-premium text-card-foreground shadow-panel",
         className
       )}
       {...props}
@@ -22,7 +22,7 @@ export function CardHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col gap-1 border-b border-border/80 p-5", className)}
+      className={cn("soft-divider flex flex-col gap-1 border-b p-5", className)}
       {...props}
     />
   );

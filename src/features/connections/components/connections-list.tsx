@@ -18,7 +18,10 @@ export function ConnectionsList() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">Connections</p>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Connections</p>
+          <p className="text-xs text-muted-foreground">Profiles with live reconnect support</p>
+        </div>
         <Badge variant="outline">{profiles.length}</Badge>
       </div>
 
@@ -36,11 +39,11 @@ export function ConnectionsList() {
               className={cn(
                 "group flex items-start gap-3 rounded-2xl border px-3 py-3 transition",
                 activeProfileId === profile.id
-                  ? "border-primary/30 bg-primary/10"
-                  : "border-border/80 bg-secondary/25 hover:bg-secondary/50"
+                  ? "border-primary/30 bg-primary/10 shadow-glow"
+                  : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
               )}
             >
-              <div className="mt-0.5 rounded-xl bg-background/80 p-2">
+              <div className="mt-0.5 rounded-xl border border-white/10 bg-background/80 p-2">
                 {profile.hasLiveUri ? (
                   <PlugZap className="h-4 w-4 text-primary" />
                 ) : (

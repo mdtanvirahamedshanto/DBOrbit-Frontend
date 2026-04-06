@@ -3,18 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "focus-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition disabled:pointer-events-none disabled:opacity-50",
+  "focus-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition duration-200 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-glow hover:bg-primary/90",
+          "bg-primary text-primary-foreground shadow-glow hover:-translate-y-0.5 hover:bg-primary/92",
         secondary:
-          "border border-border/80 bg-secondary/70 text-secondary-foreground hover:bg-secondary",
+          "border border-white/10 bg-white/[0.05] text-secondary-foreground hover:-translate-y-0.5 hover:bg-white/[0.08]",
         ghost:
           "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
         outline:
-          "border border-border bg-background/40 text-foreground hover:bg-secondary/70",
+          "border border-border bg-background/40 text-foreground hover:-translate-y-0.5 hover:bg-secondary/70",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90"
       },
