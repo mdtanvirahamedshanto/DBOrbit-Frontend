@@ -18,9 +18,11 @@ const stageTemplates = [
 ];
 
 export function AggregationBuilder({
+  connectionId,
   connection,
   resource
 }: {
+  connectionId?: string;
   connection?: ConnectionProfile;
   resource?: ResourceTarget;
 }) {
@@ -33,19 +35,19 @@ export function AggregationBuilder({
   ]);
 
   const mutation = useMutation({
-    mutationFn: () => runAggregation(connection!, resource!, stages)
+    mutationFn: () => runAggregation(connectionId!, resource!, stages)
   });
 
   useEffect(() => {
     const run = () => {
-      if (connection && resource) {
+      if (connectionId && connection && resource) {
         mutation.mutate();
       }
     };
 
     window.addEventListener("dborbit:run-aggregation", run);
     return () => window.removeEventListener("dborbit:run-aggregation", run);
-  }, [connection, mutation, resource, stages]);
+  }, [connection, connectionId, mutation, resource, stages]);
 
   if (connection?.type !== "mongodb") {
     return (
@@ -151,7 +153,7 @@ export function AggregationBuilder({
               Add stage
             </Button>
 
-            <Button onClick={() => mutation.mutate()} disabled={!connection || !resource}>
+            <Button onClick={() => mutation.mutate()} disabled={!connectionId || !connection || !resource}>
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

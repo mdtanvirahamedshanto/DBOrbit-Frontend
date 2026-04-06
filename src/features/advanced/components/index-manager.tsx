@@ -11,9 +11,11 @@ import { createIndex, deleteIndex, getIndexes } from "@/services/advanced-servic
 import { ConnectionProfile, ResourceTarget } from "@/types";
 
 export function IndexManager({
+  connectionId,
   connection,
   resource
 }: {
+  connectionId?: string;
   connection?: ConnectionProfile;
   resource?: ResourceTarget;
 }) {
@@ -23,37 +25,37 @@ export function IndexManager({
   const [unique, setUnique] = useState(false);
 
   const query = useQuery({
-    queryKey: queryKeys.indexes(connection?.id, resource?.resourceId),
-    queryFn: () => getIndexes(connection!, resource!),
-    enabled: Boolean(connection && resource)
+    queryKey: queryKeys.indexes(connectionId, resource?.database, resource?.resourceId),
+    queryFn: () => getIndexes(connectionId!, resource!),
+    enabled: Boolean(connectionId && resource)
   });
 
   const createMutation = useMutation({
     mutationFn: () =>
-      createIndex(connection!, resource!, {
+      createIndex(connectionId!, resource!, {
         name,
         keys: keys
           .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
         unique,
-        type: connection?.type === "mongodb" ? "compound" : "btree"
+        type: connection?.type === "mongodb" ? "mongodb" : "btree"
       }),
     onSuccess: async () => {
       setName("");
       setKeys("");
       setUnique(false);
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.indexes(connection?.id, resource?.resourceId)
+        queryKey: queryKeys.indexes(connectionId, resource?.database, resource?.resourceId)
       });
     }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (indexId: string) => deleteIndex(connection!, resource!, indexId),
+    mutationFn: (indexId: string) => deleteIndex(connectionId!, resource!, indexId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.indexes(connection?.id, resource?.resourceId)
+        queryKey: queryKeys.indexes(connectionId, resource?.database, resource?.resourceId)
       });
     }
   });
@@ -98,7 +100,7 @@ export function IndexManager({
 
           <Button
             onClick={() => createMutation.mutate()}
-            disabled={!name.trim() || !keys.trim() || !connection || !resource}
+            disabled={!name.trim() || !keys.trim() || !connectionId || !resource}
           >
             Create Index
           </Button>
@@ -124,7 +126,7 @@ export function IndexManager({
                   {index.unique ? <Badge>Unique</Badge> : null}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {index.keys.join(", ")} • {index.type ?? "btree"}
+                  {index.definition ?? index.keys.join(", ")} • {index.type ?? "btree"}
                 </p>
               </div>
 

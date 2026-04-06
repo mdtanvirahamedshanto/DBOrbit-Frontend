@@ -1,9 +1,10 @@
-export type DatabaseType = "mongodb" | "postgresql" | "mysql";
+export type DatabaseType = "mongodb" | "postgres" | "mysql";
+export type LegacyDatabaseType = "postgresql";
 
 export interface PersistedConnectionProfile {
   id: string;
   name: string;
-  type: DatabaseType;
+  type: DatabaseType | LegacyDatabaseType;
   redactedUri: string;
   host?: string;
   port?: number;
@@ -13,11 +14,28 @@ export interface PersistedConnectionProfile {
   updatedAt: string;
 }
 
-export interface ResolvedConnectionProfile extends PersistedConnectionProfile {
+export interface ResolvedConnectionProfile
+  extends Omit<PersistedConnectionProfile, "type"> {
+  type: DatabaseType;
   uri?: string;
 }
 
 export type ConnectionProfile = ResolvedConnectionProfile;
+
+export interface ConnectResult {
+  connectionId: string;
+  type: DatabaseType;
+  reused: boolean;
+  createdAt: string;
+}
+
+export interface ActiveConnectionSession {
+  profileId?: string;
+  connectionId?: string;
+  type?: DatabaseType;
+  status: "idle" | "connecting" | "connected" | "error";
+  errorMessage?: string;
+}
 
 export type ExplorerNodeKind =
   | "database"
@@ -55,11 +73,9 @@ export interface ColumnDefinition {
   width?: number;
 }
 
+export type DbRecordPrimitive = string | number | boolean | null;
 export type DbRecordValue =
-  | string
-  | number
-  | boolean
-  | null
+  | DbRecordPrimitive
   | Record<string, unknown>
   | unknown[];
 
@@ -115,9 +131,9 @@ export interface AggregationStage {
 export interface SchemaFieldStat {
   field: string;
   type: string;
-  frequency: number;
   nullable: boolean;
-  sample?: string;
+  observedCount?: number;
+  details?: string;
 }
 
 export interface IndexDefinition {
@@ -127,6 +143,7 @@ export interface IndexDefinition {
   unique?: boolean;
   sparse?: boolean;
   type?: string;
+  definition?: string;
 }
 
 export type WorkspaceTab =

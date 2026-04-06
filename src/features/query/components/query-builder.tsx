@@ -12,15 +12,17 @@ import { FilterRuleRow } from "@/features/query/components/filter-rule-row";
 import { ConnectionProfile, ResourceTarget } from "@/types";
 
 export function QueryBuilder({
+  connectionId,
   connection,
   resource,
   fields
 }: {
+  connectionId?: string;
   connection?: ConnectionProfile;
   resource?: ResourceTarget;
   fields: string[];
 }) {
-  const builder = useQueryBuilder(connection, resource);
+  const builder = useQueryBuilder(connectionId, connection, resource);
 
   useEffect(() => {
     const run = () => builder.canRun && builder.runQuery();
@@ -100,11 +102,11 @@ export function QueryBuilder({
             </>
           ) : (
             <CodeEditor
-              language={connection?.type === "mongodb" ? "javascript" : "sql"}
+              language={connection?.type === "mongodb" ? "json" : "sql"}
               value={
                 builder.advancedQuery ||
                 (connection?.type === "mongodb"
-                  ? `db.${resource?.entity ?? "collection"}.find({\n  "status": "active"\n})`
+                  ? `{\n  "status": "active"\n}`
                   : `SELECT * FROM ${resource?.entity ?? "table"}\nWHERE status = 'active';`)
               }
               onChange={builder.setAdvancedQuery}
@@ -139,7 +141,7 @@ export function QueryBuilder({
               </p>
               <CodeEditor
                 height={180}
-                language={connection?.type === "mongodb" ? "javascript" : "sql"}
+                language={connection?.type === "mongodb" ? "json" : "sql"}
                 value={builder.queryResult?.generatedQuery ?? "// Run a query to generate output"}
                 readOnly
               />

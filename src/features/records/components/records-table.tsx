@@ -72,9 +72,9 @@ interface RecordsTableProps {
   items: DbRecord[];
   sorting: SortState[];
   onSortingChange: (sorting: SortState[]) => void;
-  onInlineSave: (recordId: string, patch: DbRecord) => Promise<void>;
+  onInlineSave: (record: DbRecord, patch: DbRecord) => Promise<void>;
   onEdit: (record: DbRecord) => void;
-  onDelete: (recordId: string) => Promise<void>;
+  onDelete: (record: DbRecord) => Promise<void>;
 }
 
 export function RecordsTable({
@@ -91,7 +91,7 @@ export function RecordsTable({
     field: string;
     value: string;
   } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DbRecord | null>(null);
 
   const tableColumns = useMemo<ColumnDef<DbRecord>[]>(
     () => [
@@ -138,7 +138,7 @@ export function RecordsTable({
                     const patch = {
                       [column.key]: parseValue(editingCell.value, column.type)
                     } as DbRecord;
-                    await onInlineSave(recordId, patch);
+                    await onInlineSave(record, patch);
                   }
                   setEditingCell(null);
                 }}
@@ -147,7 +147,7 @@ export function RecordsTable({
                     const patch = {
                       [column.key]: parseValue(editingCell.value, column.type)
                     } as DbRecord;
-                    await onInlineSave(recordId, patch);
+                    await onInlineSave(record, patch);
                     setEditingCell(null);
                   }
 
@@ -196,7 +196,7 @@ export function RecordsTable({
             <Button
               size="icon"
               variant="ghost"
-              onClick={() => setDeleteTarget(getRecordId(row.original))}
+              onClick={() => setDeleteTarget(row.original)}
             >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>

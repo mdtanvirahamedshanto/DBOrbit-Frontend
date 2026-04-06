@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCcw, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,11 +19,22 @@ import { IndexManager } from "@/features/advanced/components/index-manager";
 import { useUiStore } from "@/store/ui-store";
 import { ConnectionProfile, DbRecord, SortState } from "@/types";
 
-function getRecordId(record: DbRecord) {
-  return String(record.id ?? record._id ?? JSON.stringify(record));
+function matchesSearch(record: DbRecord, search: string) {
+  if (!search.trim()) {
+    return true;
+  }
+
+  const normalized = search.toLowerCase();
+  return JSON.stringify(record).toLowerCase().includes(normalized);
 }
 
-export function RecordsPanel({ connection }: { connection?: ConnectionProfile }) {
+export function RecordsPanel({
+  connection,
+  connectionId
+}: {
+  connection?: ConnectionProfile;
+  connectionId?: string;
+}) {
   const activeResource = useUiStore((state) => state.activeResource);
   const activeTab = useUiStore((state) => state.activeTab);
   const setActiveTab = useUiStore((state) => state.setActiveTab);
@@ -51,15 +62,19 @@ export function RecordsPanel({ connection }: { connection?: ConnectionProfile })
     [deferredSearch, page, pageSize, sorting]
   );
 
-  const recordsQuery = useRecords(connection, activeResource, params);
-  const mutations = useRecordMutations(connection, activeResource);
+  const recordsQuery = useRecords(connectionId, activeResource, params);
+  const mutations = useRecordMutations(connectionId, activeResource);
 
   useEffect(() => {
     setPage(1);
   }, [activeResource, deferredSearch]);
 
   const columns = recordsQuery.data?.columns ?? [];
-  const items = recordsQuery.data?.items ?? [];
+  const rawItems = recordsQuery.data?.items ?? [];
+  const items = useMemo(
+    () => rawItems.filter((item) => matchesSearch(item, deferredSearch)),
+    [deferredSearch, rawItems]
+  );
 
   useEffect(() => {
     if (recordDialogOpen) {
@@ -83,7 +98,7 @@ export function RecordsPanel({ connection }: { connection?: ConnectionProfile })
 
     if (selectedRecord) {
       await mutations.updateMutation.mutateAsync({
-        recordId: getRecordId(selectedRecord),
+        currentRecord: selectedRecord,
         patch: payload
       });
     } else {
@@ -179,17 +194,42 @@ export function RecordsPanel({ connection }: { connection?: ConnectionProfile })
                     </div>
                   ) : null}
 
-                  <RecordsTable
-                    columns={columns}
-                    items={items}
-                    sorting={sorting}
-                    onSortingChange={setSorting}
-                    onInlineSave={async (recordId, patch) => {
-                      await mutations.updateMutation.mutateAsync({ recordId, patch });
-                    }}
-                    onEdit={(record) => openRecordDialog(record)}
-                    onDelete={(recordId) => mutations.deleteMutation.mutateAsync(recordId)}
-                  />
+                  {recordsQuery.isError ? (
+                    <div className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+                      <p className="text-sm text-muted-foreground">
+                        Records could not be loaded for this resource.
+                      </p>
+                      <Button size="sm" variant="secondary" onClick={() => void recordsQuery.refetch()}>
+                        <RefreshCcw className="h-4 w-4" />
+                        Retry
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  {!recordsQuery.isLoading && !recordsQuery.isError && items.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border/80 bg-secondary/20 p-6 text-sm text-muted-foreground">
+                      No records matched the current view.
+                    </div>
+                  ) : null}
+
+                  {!recordsQuery.isError ? (
+                    <RecordsTable
+                      columns={columns}
+                      items={items}
+                      sorting={sorting}
+                      onSortingChange={setSorting}
+                      onInlineSave={async (record, patch) => {
+                        await mutations.updateMutation.mutateAsync({
+                          currentRecord: record,
+                          patch
+                        });
+                      }}
+                      onEdit={(record) => openRecordDialog(record)}
+                      onDelete={async (record) => {
+                        await mutations.deleteMutation.mutateAsync(record);
+                      }}
+                    />
+                  ) : null}
 
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-sm text-muted-foreground">
@@ -233,6 +273,7 @@ export function RecordsPanel({ connection }: { connection?: ConnectionProfile })
 
                 <TabsContent value="query">
                   <QueryBuilder
+                    connectionId={connectionId}
                     connection={connection}
                     resource={activeResource}
                     fields={columns.map((column) => column.key)}
@@ -240,15 +281,15 @@ export function RecordsPanel({ connection }: { connection?: ConnectionProfile })
                 </TabsContent>
 
                 <TabsContent value="aggregation">
-                  <AggregationBuilder connection={connection} resource={activeResource} />
+                  <AggregationBuilder connectionId={connectionId} connection={connection} resource={activeResource} />
                 </TabsContent>
 
                 <TabsContent value="schema">
-                  <SchemaViewer connection={connection} resource={activeResource} />
+                  <SchemaViewer connectionId={connectionId} resource={activeResource} />
                 </TabsContent>
 
                 <TabsContent value="indexes">
-                  <IndexManager connection={connection} resource={activeResource} />
+                  <IndexManager connectionId={connectionId} connection={connection} resource={activeResource} />
                 </TabsContent>
               </Tabs>
             </CardContent>

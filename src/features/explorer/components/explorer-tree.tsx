@@ -6,9 +6,11 @@ import {
   ChevronRight,
   Database,
   FolderTree,
+  RefreshCcw,
   Table2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useExplorerTree } from "@/features/explorer/hooks/use-explorer-tree";
@@ -48,8 +50,14 @@ function flattenResourceNodes(nodes: ExplorerNode[]): ExplorerNode[] {
   });
 }
 
-export function ExplorerTree({ connection }: { connection?: ConnectionProfile }) {
-  const { data, isLoading } = useExplorerTree(connection);
+export function ExplorerTree({
+  connection,
+  connectionId
+}: {
+  connection?: ConnectionProfile;
+  connectionId?: string;
+}) {
+  const { data, isLoading, isError, refetch } = useExplorerTree(connectionId, connection?.type);
   const activeResource = useUiStore((state) => state.activeResource);
   const setActiveResource = useUiStore((state) => state.setActiveResource);
 
@@ -98,13 +106,25 @@ export function ExplorerTree({ connection }: { connection?: ConnectionProfile })
       <ScrollArea className="min-h-0 flex-1 pr-1">
         {isLoading ? (
           <div className="rounded-2xl border border-border/80 bg-secondary/25 p-4 text-sm text-muted-foreground">
-            Loading database tree...
+            Loading databases and collections...
           </div>
         ) : null}
 
         {!isLoading && !connection ? (
           <div className="rounded-2xl border border-dashed border-border/80 bg-secondary/20 p-4 text-sm text-muted-foreground">
             Select a connection to inspect its databases and collections.
+          </div>
+        ) : null}
+
+        {isError ? (
+          <div className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm text-muted-foreground">
+              The explorer could not load. Check the connection and try again.
+            </p>
+            <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+              <RefreshCcw className="h-4 w-4" />
+              Retry
+            </Button>
           </div>
         ) : null}
 
@@ -172,9 +192,6 @@ function TreeNode({
 
         <NodeIcon kind={node.kind} />
         <span className="truncate">{node.name}</span>
-        {node.stats?.count !== undefined ? (
-          <span className="ml-auto text-xs text-muted-foreground">{node.stats.count}</span>
-        ) : null}
       </button>
 
       {hasChildren && isExpanded ? (

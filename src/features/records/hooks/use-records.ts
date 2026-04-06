@@ -9,74 +9,93 @@ import {
   getRecords,
   updateRecord
 } from "@/services/records-service";
-import {
-  ConnectionProfile,
-  DbRecord,
-  RecordsQueryParams,
-  ResourceTarget
-} from "@/types";
+import { DbRecord, RecordsQueryParams, ResourceTarget } from "@/types";
 
 export function useRecords(
-  connection: ConnectionProfile | undefined,
+  connectionId: string | undefined,
   resource: ResourceTarget | undefined,
   params: RecordsQueryParams
 ) {
   return useQuery({
-    queryKey: queryKeys.records(connection?.id, resource?.resourceId, params),
+    queryKey: queryKeys.records(
+      connectionId,
+      resource?.database,
+      resource?.resourceId,
+      params
+    ),
     queryFn: () =>
       getRecords({
-        connection: connection!,
+        connectionId: connectionId!,
         resource: resource!,
         params
       }),
-    enabled: Boolean(connection && resource),
+    enabled: Boolean(connectionId && resource),
     placeholderData: (previous) => previous
   });
 }
 
-export function useRecordMutations(
-  connection: ConnectionProfile | undefined,
-  resource: ResourceTarget | undefined
-) {
+export function useInsert(connectionId?: string, resource?: ResourceTarget) {
   const queryClient = useQueryClient();
 
-  const invalidate = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: ["records", connection?.id, resource?.resourceId]
-    });
-    await queryClient.invalidateQueries({
-      queryKey: ["schema", connection?.id, resource?.resourceId]
-    });
-  };
-
-  const createMutation = useMutation({
-    mutationFn: (payload: DbRecord) => createRecord(connection!, resource!, payload),
+  return useMutation({
+    mutationFn: (payload: DbRecord) => createRecord(connectionId!, resource!, payload),
     onSuccess: async () => {
       toast.success("Record inserted");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.records(connectionId, resource?.database, resource?.resourceId)
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.schema(connectionId, resource?.database, resource?.resourceId)
+        })
+      ]);
     }
   });
+}
 
-  const updateMutation = useMutation({
-    mutationFn: ({ recordId, patch }: { recordId: string; patch: DbRecord }) =>
-      updateRecord(connection!, resource!, recordId, patch),
+export function useUpdate(connectionId?: string, resource?: ResourceTarget) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { currentRecord: DbRecord; patch: DbRecord }) =>
+      updateRecord(connectionId!, resource!, input.currentRecord, input.patch),
     onSuccess: async () => {
       toast.success("Record updated");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.records(connectionId, resource?.database, resource?.resourceId)
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.schema(connectionId, resource?.database, resource?.resourceId)
+        })
+      ]);
     }
   });
+}
 
-  const deleteMutation = useMutation({
-    mutationFn: (recordId: string) => deleteRecord(connection!, resource!, recordId),
+export function useDelete(connectionId?: string, resource?: ResourceTarget) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (currentRecord: DbRecord) => deleteRecord(connectionId!, resource!, currentRecord),
     onSuccess: async () => {
       toast.success("Record deleted");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.records(connectionId, resource?.database, resource?.resourceId)
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.schema(connectionId, resource?.database, resource?.resourceId)
+        })
+      ]);
     }
   });
+}
 
+export function useRecordMutations(connectionId?: string, resource?: ResourceTarget) {
   return {
-    createMutation,
-    updateMutation,
-    deleteMutation
+    createMutation: useInsert(connectionId, resource),
+    updateMutation: useUpdate(connectionId, resource),
+    deleteMutation: useDelete(connectionId, resource)
   };
 }

@@ -1,13 +1,13 @@
-import { apiClient } from "@/lib/api";
-import { ConnectionProfile, ExplorerNode } from "@/types";
-import { getConnectionPayload } from "@/services/connection-service";
-import { getMockExplorerTree } from "@/services/mock-data";
+import { apiClient, unwrapResponse } from "@/lib/api";
 
-export async function getExplorerTree(connection: ConnectionProfile): Promise<ExplorerNode[]> {
-  try {
-    const { data } = await apiClient.post("/explorer/tree", getConnectionPayload(connection));
-    return data.nodes as ExplorerNode[];
-  } catch {
-    return getMockExplorerTree(connection);
-  }
+export async function getDatabases(connectionId: string) {
+  return unwrapResponse<string[]>(apiClient.get(`/databases/${connectionId}`));
+}
+
+export async function getCollections(connectionId: string, db: string) {
+  return unwrapResponse<string[]>(
+    apiClient.get(`/collections/${connectionId}`, {
+      params: { db }
+    })
+  );
 }

@@ -1,12 +1,17 @@
 export const queryKeys = {
-  explorer: (connectionId?: string) => ["explorer", connectionId] as const,
+  databases: (connectionId?: string) => ["databases", connectionId] as const,
+  collections: (connectionId?: string, db?: string) =>
+    ["collections", connectionId, db] as const,
+  explorer: (connectionId?: string, type?: string) =>
+    ["explorer", connectionId, type] as const,
   records: (
     connectionId?: string,
-    resourceId?: string,
+    database?: string,
+    collection?: string,
     params?: unknown
-  ) => ["records", connectionId, resourceId, params] as const,
-  schema: (connectionId?: string, resourceId?: string) =>
-    ["schema", connectionId, resourceId] as const,
-  indexes: (connectionId?: string, resourceId?: string) =>
-    ["indexes", connectionId, resourceId] as const
+  ) => ["records", connectionId, database, collection, params] as const,
+  schema: (connectionId?: string, database?: string, collection?: string) =>
+    ["schema", connectionId, database, collection] as const,
+  indexes: (connectionId?: string, database?: string, collection?: string) =>
+    ["indexes", connectionId, database, collection] as const
 };

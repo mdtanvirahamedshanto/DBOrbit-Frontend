@@ -332,9 +332,9 @@ function baseMongoWorkspace(): MockWorkspace {
   };
 }
 
-function baseSqlWorkspace(flavor: "postgresql" | "mysql"): MockWorkspace {
+function baseSqlWorkspace(flavor: "postgres" | "mysql"): MockWorkspace {
   const customersTarget: ResourceTarget = {
-    database: flavor === "postgresql" ? "sales" : "commerce",
+    database: flavor === "postgres" ? "sales" : "commerce",
     schema: "public",
     entity: "customers",
     kind: "table",
@@ -342,7 +342,7 @@ function baseSqlWorkspace(flavor: "postgresql" | "mysql"): MockWorkspace {
   };
 
   const ordersTarget: ResourceTarget = {
-    database: flavor === "postgresql" ? "sales" : "commerce",
+    database: flavor === "postgres" ? "sales" : "commerce",
     schema: "public",
     entity: "orders",
     kind: "table",
@@ -403,7 +403,7 @@ function baseSqlWorkspace(flavor: "postgresql" | "mysql"): MockWorkspace {
     }
   ];
 
-  const databaseName = flavor === "postgresql" ? "sales" : "commerce";
+  const databaseName = flavor === "postgres" ? "sales" : "commerce";
 
   return {
     tree: [

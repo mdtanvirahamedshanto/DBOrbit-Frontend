@@ -6,19 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { queryKeys } from "@/lib/query-keys";
 import { getSchema } from "@/services/advanced-service";
-import { ConnectionProfile, ResourceTarget } from "@/types";
+import { ResourceTarget } from "@/types";
 
 export function SchemaViewer({
-  connection,
+  connectionId,
   resource
 }: {
-  connection?: ConnectionProfile;
+  connectionId?: string;
   resource?: ResourceTarget;
 }) {
   const query = useQuery({
-    queryKey: queryKeys.schema(connection?.id, resource?.resourceId),
-    queryFn: () => getSchema(connection!, resource!),
-    enabled: Boolean(connection && resource)
+    queryKey: queryKeys.schema(connectionId, resource?.database, resource?.resourceId),
+    queryFn: () => getSchema(connectionId!, resource!),
+    enabled: Boolean(connectionId && resource)
   });
 
   return (
@@ -38,7 +38,7 @@ export function SchemaViewer({
           >
             <div>
               <p className="font-medium text-foreground">{field.field}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{field.sample}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{field.details}</p>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Binary className="h-4 w-4 text-primary" />
@@ -46,7 +46,7 @@ export function SchemaViewer({
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <BarChart3 className="h-4 w-4 text-accent" />
-              {field.frequency} hits
+              {field.observedCount ? `${field.observedCount} samples` : "Metadata"}
             </div>
             <div className="flex items-center justify-between gap-3">
               <Badge variant={field.nullable ? "outline" : "secondary"}>

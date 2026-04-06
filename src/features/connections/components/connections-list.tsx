@@ -10,8 +10,8 @@ import { useConnections } from "@/features/connections/hooks/use-connections";
 export function ConnectionsList() {
   const {
     profiles,
-    activeConnectionId,
-    setActiveConnectionId,
+    activeProfileId,
+    openLiveConnection,
     deleteConnection
   } = useConnections();
 
@@ -35,7 +35,7 @@ export function ConnectionsList() {
               key={profile.id}
               className={cn(
                 "group flex items-start gap-3 rounded-2xl border px-3 py-3 transition",
-                activeConnectionId === profile.id
+                activeProfileId === profile.id
                   ? "border-primary/30 bg-primary/10"
                   : "border-border/80 bg-secondary/25 hover:bg-secondary/50"
               )}
@@ -49,7 +49,7 @@ export function ConnectionsList() {
               </div>
 
               <button
-                onClick={() => setActiveConnectionId(profile.id)}
+                onClick={() => void openLiveConnection(profile.id)}
                 className="focus-ring min-w-0 flex-1 rounded-xl text-left"
               >
                 <div className="flex items-center gap-2">

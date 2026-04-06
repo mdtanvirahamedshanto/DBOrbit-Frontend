@@ -14,7 +14,7 @@ import { useUiStore } from "@/store/ui-store";
 
 export function AppShell() {
   const queryClient = useQueryClient();
-  const { profiles, activeConnection, setActiveConnectionId } = useConnections();
+  const { profiles, activeConnection, connectionId, openLiveConnection } = useConnections();
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUiStore((state) => state.setSidebarOpen);
   const setConnectionDialogOpen = useUiStore((state) => state.setConnectionDialogOpen);
@@ -23,9 +23,9 @@ export function AppShell() {
 
   useEffect(() => {
     if (!activeConnection && profiles.length > 0) {
-      setActiveConnectionId(profiles[0].id);
+      void openLiveConnection(profiles[0].id);
     }
-  }, [activeConnection, profiles, setActiveConnectionId]);
+  }, [activeConnection, openLiveConnection, profiles]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -106,7 +106,7 @@ export function AppShell() {
             </div>
 
             <ConnectionsList />
-            <ExplorerTree connection={activeConnection} />
+            <ExplorerTree connection={activeConnection} connectionId={connectionId} />
           </aside>
 
           {sidebarOpen ? (
@@ -145,7 +145,7 @@ export function AppShell() {
                 </CardContent>
               </Card>
             ) : (
-              <RecordsPanel connection={activeConnection} />
+              <RecordsPanel connection={activeConnection} connectionId={connectionId} />
             )}
           </section>
         </div>

@@ -7,7 +7,13 @@ import { useConnections } from "@/features/connections/hooks/use-connections";
 import { useUiStore } from "@/store/ui-store";
 
 export function ConnectionSwitcher() {
-  const { profiles, activeConnectionId, setActiveConnectionId, activeConnection } =
+  const {
+    profiles,
+    activeProfileId,
+    openLiveConnection,
+    activeConnection,
+    connectionStatus
+  } =
     useConnections();
   const setConnectionDialogOpen = useUiStore((state) => state.setConnectionDialogOpen);
 
@@ -16,8 +22,12 @@ export function ConnectionSwitcher() {
       <div className="relative min-w-[220px]">
         <Database className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
         <select
-          value={activeConnectionId ?? ""}
-          onChange={(event) => setActiveConnectionId(event.target.value || undefined)}
+          value={activeProfileId ?? ""}
+          onChange={(event) => {
+            if (event.target.value) {
+              void openLiveConnection(event.target.value);
+            }
+          }}
           className="focus-ring h-11 w-full appearance-none rounded-xl border border-border/80 bg-secondary/60 pl-9 pr-10 text-sm"
         >
           <option value="">Select connection</option>
@@ -31,7 +41,9 @@ export function ConnectionSwitcher() {
       </div>
 
       {activeConnection ? (
-        <Badge variant="secondary">{activeConnection.type}</Badge>
+        <Badge variant="secondary">
+          {connectionStatus === "connecting" ? "Connecting..." : activeConnection.type}
+        </Badge>
       ) : (
         <Badge variant="outline">No live connection</Badge>
       )}

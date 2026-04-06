@@ -1,10 +1,15 @@
 import {
   ConnectionProfile,
   DatabaseType,
+  LegacyDatabaseType,
   PersistedConnectionProfile,
   ResolvedConnectionProfile
 } from "@/types";
 import { getSessionConnectionUri } from "@/lib/storage";
+
+export function normalizeDatabaseType(type: DatabaseType | LegacyDatabaseType): DatabaseType {
+  return type === "postgresql" ? "postgres" : type;
+}
 
 export function parseConnectionUri(uri: string) {
   try {
@@ -71,6 +76,7 @@ export function resolveConnectionProfile(
 ): ResolvedConnectionProfile {
   return {
     ...profile,
+    type: normalizeDatabaseType(profile.type),
     uri: getSessionConnectionUri(profile.id)
   };
 }

@@ -14,13 +14,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useConnections } from "@/features/connections/hooks/use-connections";
-import { validateConnection } from "@/services/connection-service";
 import { useUiStore } from "@/store/ui-store";
 import { DatabaseType } from "@/types";
 
 const databaseTypes: Array<{ label: string; value: DatabaseType }> = [
   { label: "MongoDB", value: "mongodb" },
-  { label: "PostgreSQL", value: "postgresql" },
+  { label: "PostgreSQL", value: "postgres" },
   { label: "MySQL", value: "mysql" }
 ];
 
@@ -44,24 +43,11 @@ export function ConnectionFormDialog() {
     setTesting(true);
 
     try {
-      const result = await validateConnection({
-        id: "preview",
-        name,
-        type,
-        redactedUri: uri,
-        uri,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-
-      if (!result.success) {
-        toast.error("Connection test failed");
-        return;
-      }
-
       setSaving(true);
-      saveConnection({ name, type, uri });
-      toast.success(`Connection saved${result.latencyMs ? ` in ${result.latencyMs}ms` : ""}`);
+      const result = await saveConnection({ name, type, uri });
+      toast.success(
+        result.reused ? "Connection restored and ready." : "Connection verified and saved."
+      );
       setName("");
       setUri("");
       setType("mongodb");
