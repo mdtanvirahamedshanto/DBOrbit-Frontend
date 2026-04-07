@@ -10,6 +10,7 @@ import { useConnections } from "@/features/connections/hooks/use-connections";
 import { ExplorerTree } from "@/features/explorer/components/explorer-tree";
 import { RecordsPanel } from "@/features/records/components/records-panel";
 import { TopBar } from "@/components/shell/top-bar";
+import { Footer } from "@/components/shell/footer";
 import { useUiStore } from "@/store/ui-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
 
@@ -173,6 +174,8 @@ export function AppShell() {
           </section>
         </div>
       </main>
+
+      <Footer />
     </>
   );
 }
