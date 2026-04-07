@@ -19,7 +19,7 @@ export const apiClient = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_URL?.trim() ||
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
-    "http://localhost:4000",
+    "https://dborbit-api.vercel.app",
   timeout: 20_000,
   headers: {
     "Content-Type": "application/json"
