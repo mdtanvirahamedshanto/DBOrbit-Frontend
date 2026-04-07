@@ -214,7 +214,6 @@ TanStack Query result caching, lazy-loaded Monaco editor, virtualized records ta
 </p>
 
 - 🌐 GitHub: [@mdtanvirahamedshanto](https://github.com/mdtanvirahamedshanto)
-- 📧 Email: mdtanvirahamdsanto987@gmail.com
 
 ---
 

@@ -1,4 +1,4 @@
-import { Github, Heart, Mail } from "lucide-react";
+import { Github, Heart } from "lucide-react";
 
 export function Footer() {
   return (
@@ -28,14 +28,6 @@ export function Footer() {
           >
             <Github className="h-3.5 w-3.5" />
             <span>GitHub</span>
-          </a>
-          <a
-            href="mailto:mdtanvirahamdsanto987@gmail.com"
-            className="flex items-center gap-1.5 transition-colors hover:text-primary"
-            aria-label="Contact via Email"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            <span>Contact</span>
           </a>
           <span className="glass-chip">DBOrbit v0.1.0</span>
         </div>
