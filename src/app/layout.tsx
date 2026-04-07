@@ -3,16 +3,27 @@ import "./globals.css";
 import { Providers } from "@/app/providers";
 
 export const metadata: Metadata = {
-  title: "DBOrbit | Multi-Database Admin Panel",
+  title: {
+    default: "DBOrbit – Multi-Database Admin Panel | MongoDB · PostgreSQL · MySQL",
+    template: "%s | DBOrbit",
+  },
   description:
-    "Production-grade web database GUI for MongoDB, PostgreSQL, and MySQL with explorer, CRUD, query builder, schema viewer, and index management.",
+    "DBOrbit is a production-grade, open-source web GUI for MongoDB, PostgreSQL and MySQL. Explore databases, run queries, manage schemas and indexes – all from one beautiful dashboard.",
   keywords: [
     "database admin panel",
     "mongodb gui",
-    "postgres admin",
+    "postgresql admin",
     "mysql admin",
-    "next.js dashboard"
-  ]
+    "database management tool",
+    "open source database ui",
+    "next.js database dashboard",
+    "db orbit",
+    "sql client web",
+    "nosql gui",
+  ],
+  authors: [{ name: "DBOrbit" }],
+  robots: { index: true, follow: true },
+  metadataBase: new URL("https://dborbit.app"),
 };
 
 export default function RootLayout({
